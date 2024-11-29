@@ -23,33 +23,37 @@ Rules for Ikarus:
 
 export async function POST(req: NextRequest) {
     try {
-        // Log environment check
-        console.log('Environment check:', {
+        // Log environment and request info
+        console.log('API Route - Environment:', {
             nodeEnv: process.env.NODE_ENV,
             hasApiKey: !!process.env.OPENAI_API_KEY,
-            apiKeyLength: process.env.OPENAI_API_KEY?.length || 0
+            apiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+            vercelEnv: process.env.VERCEL_ENV,
+            url: req.url,
+            method: req.method
         });
 
-        const { userInput } = await req.json();
-        console.log('Received user input:', userInput);
+        const body = await req.json();
+        console.log('API Route - Request body:', body);
 
         if (!process.env.OPENAI_API_KEY) {
-            console.error('OpenAI API key is missing');
+            console.error('API Route - OpenAI API key is missing');
             return NextResponse.json(
                 { error: "Server configuration error", details: "API key is missing" },
                 { status: 500 }
             );
         }
 
+        const { userInput } = body;
         if (!userInput) {
-            console.log('No input provided');
+            console.log('API Route - No input provided');
             return NextResponse.json(
                 { error: "No input provided" },
                 { status: 400 }
             );
         }
 
-        console.log('Sending request to OpenAI...');
+        console.log('API Route - Sending request to OpenAI...');
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [
@@ -59,25 +63,34 @@ export async function POST(req: NextRequest) {
             temperature: 0.7,
             max_tokens: 500,
         });
-        console.log('Received response from OpenAI');
+        console.log('API Route - OpenAI response received:', {
+            id: response.id,
+            model: response.model,
+            usage: response.usage
+        });
 
         const message = response.choices[0].message.content;
-        console.log('Response message:', message);
+        console.log('API Route - Response message:', message?.substring(0, 50) + '...');
 
         return NextResponse.json({ message });
     } catch (error: unknown) {
-        console.error('Detailed error:', error);
+        console.error('API Route - Detailed error:', {
+            error,
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        });
+
         if (error instanceof Error) {
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
             // Check for specific OpenAI errors
             if (error.message.includes('API key')) {
+                console.error('API Route - API key error:', error.message);
                 return NextResponse.json(
                     { error: "Authentication error", details: "Invalid API key configuration" },
                     { status: 401 }
                 );
             }
         }
+
         return NextResponse.json(
             { error: "Failed to communicate with Ikarus", details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
