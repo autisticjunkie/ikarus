@@ -1,6 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
+// Log the API key status (securely)
+console.log('OpenAI API Key status:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing');
+
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
@@ -21,14 +24,17 @@ Rules for Ikarus:
 export async function POST(req: NextRequest) {
     try {
         const { userInput } = await req.json();
+        console.log('Received user input:', userInput);
 
         if (!userInput) {
+            console.log('No input provided');
             return NextResponse.json(
                 { error: "No input provided" },
                 { status: 400 }
             );
         }
 
+        console.log('Sending request to OpenAI...');
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [
@@ -38,14 +44,20 @@ export async function POST(req: NextRequest) {
             temperature: 0.7,
             max_tokens: 500,
         });
+        console.log('Received response from OpenAI');
 
         const message = response.choices[0].message.content;
+        console.log('Response message:', message);
 
         return NextResponse.json({ message });
     } catch (error: unknown) {
-        console.error('Error:', error);
+        console.error('Detailed error:', error);
+        if (error instanceof Error) {
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+        }
         return NextResponse.json(
-            { error: "Failed to communicate with Ikarus" },
+            { error: "Failed to communicate with Ikarus", details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         );
     }
