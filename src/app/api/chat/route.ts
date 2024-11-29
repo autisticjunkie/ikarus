@@ -23,8 +23,23 @@ Rules for Ikarus:
 
 export async function POST(req: NextRequest) {
     try {
+        // Log environment check
+        console.log('Environment check:', {
+            nodeEnv: process.env.NODE_ENV,
+            hasApiKey: !!process.env.OPENAI_API_KEY,
+            apiKeyLength: process.env.OPENAI_API_KEY?.length || 0
+        });
+
         const { userInput } = await req.json();
         console.log('Received user input:', userInput);
+
+        if (!process.env.OPENAI_API_KEY) {
+            console.error('OpenAI API key is missing');
+            return NextResponse.json(
+                { error: "Server configuration error", details: "API key is missing" },
+                { status: 500 }
+            );
+        }
 
         if (!userInput) {
             console.log('No input provided');
@@ -55,6 +70,13 @@ export async function POST(req: NextRequest) {
         if (error instanceof Error) {
             console.error('Error message:', error.message);
             console.error('Error stack:', error.stack);
+            // Check for specific OpenAI errors
+            if (error.message.includes('API key')) {
+                return NextResponse.json(
+                    { error: "Authentication error", details: "Invalid API key configuration" },
+                    { status: 401 }
+                );
+            }
         }
         return NextResponse.json(
             { error: "Failed to communicate with Ikarus", details: error instanceof Error ? error.message : 'Unknown error' },
