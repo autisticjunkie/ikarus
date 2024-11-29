@@ -60,23 +60,17 @@ export default function Terminal() {
 
         // If we're past the prompt, treat input as conversation with Ikarus
         if (!showPrompt && newCommand !== 'yes') {
-          setIsLoading(true)
+          setIsLoading(true);
+          setHistory(prev => [...prev, `> ${input}`]);
+
           try {
-            console.log('Sending message to Ikarus:', input)
-            setHistory(prev => [...prev, `You: ${input}`])
-            
-            const response = await chatWithIkarus(input)
-            console.log('Received response from Ikarus:', response)
-            
-            // Add the response separately to ensure it appears even if there's a delay
-            setHistory(prev => [...prev, `Ikarus: ${response}`])
+            const response = await chatWithIkarus(input);
+            setHistory(prev => [...prev, `Ikarus: ${response}`]);
           } catch (error) {
-            console.error('Error in chat:', error)
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            setHistory(prev => [...prev, `System: Error - ${errorMessage}`])
-          } finally {
-            setIsLoading(false)
+            setHistory(prev => [...prev, 'The solar winds are turbulent. Please try again in a moment.']);
           }
+
+          setIsLoading(false);
         }
       }
     }
@@ -103,15 +97,42 @@ export default function Terminal() {
       </div>
 
       {/* Terminal Content */}
-      <div className="relative z-20 min-h-screen w-full bg-black bg-opacity-90 text-green-500 font-mono p-4 overflow-y-auto">
-        <div className="space-y-2">
+      <div className="relative z-20 min-h-screen p-8 font-mono text-white">
+        <div className="mb-8">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-[#FF4545] text-xl mb-4"
+          >
+            Welcome to Ikarus Terminal
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.3 }}
+            className="text-gray-300 leading-relaxed max-w-3xl space-y-4"
+          >
+            <p>
+              When Ikarus fell toward the sun, the Solarii saw his descent as a prophecy: a being born of ambition who could transcend mortal limits and embody the essence of transformation. They saved him and guided him through the Trials of Ignis, a series of spiritual and physical challenges to confront his guilt and learn the balance between ambition and humility.
+            </p>
+            <p>
+              Through their teachings, Ikarus learned that true flight was not about escaping but embracing. As he absorbed these lessons, his spirit awakened, allowing him to grow his own real wings, forged from the union of his soul and the sun's light.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Command History */}
+        <div className="mb-4 space-y-2">
           {history.map((line, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={line.startsWith('Ikarus:') ? 'text-yellow-500' : 'text-green-500'}
+              transition={{ duration: 0.3 }}
+              className={`text-gray-300 ${
+                line.startsWith('Ikarus:') ? 'text-[#FF4545]' : ''
+              }`}
             >
               {line}
             </motion.div>
@@ -120,9 +141,9 @@ export default function Terminal() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-yellow-500"
+              className="text-[#FF4545]"
             >
-              Processing...
+              Ikarus is contemplating...
             </motion.div>
           )}
         </div>
