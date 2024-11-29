@@ -1,99 +1,87 @@
-'use client'
+'use client';
 
-import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
-import { chatWithIkarus } from '@/lib/ikarus-ai'
+import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { chatWithIkarus } from '@/lib/ikarus-ai';
 
 export default function Terminal() {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [input, setInput] = useState('')
-  const [history, setHistory] = useState<string[]>([])
-  const [showPrompt, setShowPrompt] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [input, setInput] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(true);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const historyEndRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll to bottom when history changes
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play()
+    historyEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history]);
+
+  // Focus input on mount and when showPrompt changes
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [showPrompt]);
+
+  const handleCommand = async (command: string) => {
+    const lowerCommand = command.toLowerCase().trim();
+    
+    if (lowerCommand === 'exit') {
+      setHistory(prev => [...prev, '> Closing terminal...']);
+      setTimeout(() => {
+        window.close();
+        // If window.close() doesn't work (common in modern browsers)
+        window.location.href = '/';
+      }, 1000);
+      return;
     }
-    // Show the interaction prompt after 5 seconds
-    const timer = setTimeout(() => {
-      setShowPrompt(true)
-      setHistory(prev => [...prev, 
-        "Would you like to interact with Ikarus? (yes/no)"
-      ])
-    }, 5000)
 
-    return () => clearTimeout(timer)
-  }, [])
+    if (lowerCommand === 'clear') {
+      setHistory([]);
+      return;
+    }
 
-  const handleCommand = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const newCommand = input.trim().toLowerCase()
-      if (newCommand) {
-        setHistory(prev => [...prev, `> ${input}`])
-        setInput('')
-
-        if (!showPrompt) return
-
-        if (newCommand === 'no') {
-          setHistory(prev => [...prev, "Returning to home page..."])
-          setTimeout(() => router.push('/'), 1500)
-          return
-        }
-
-        if (newCommand === 'yes') {
-          setHistory(prev => [...prev, 
-            "You may now speak with Ikarus. What would you like to ask?",
-            "Type 'exit' to end the conversation."
-          ])
-          setShowPrompt(false)
-          return
-        }
-
-        if (newCommand === 'exit') {
-          setHistory(prev => [...prev, "Farewell, seeker of wisdom."])
-          setTimeout(() => router.push('/'), 1500)
-          return
-        }
-
-        // If we're past the prompt, treat input as conversation with Ikarus
-        if (!showPrompt && newCommand !== 'yes') {
-          setIsLoading(true);
-          setHistory(prev => [...prev, `> ${input}`]);
-
-          try {
-            const response = await chatWithIkarus(input);
-            setHistory(prev => [...prev, `Ikarus: ${response}`]);
-          } catch (error) {
-            setHistory(prev => [...prev, 'The solar winds are turbulent. Please try again in a moment.']);
-          }
-
-          setIsLoading(false);
-        }
+    if (showPrompt) {
+      if (lowerCommand === 'yes') {
+        setHistory(prev => [...prev, '> Initializing Ikarus interface...']);
+        setTimeout(() => {
+          setShowPrompt(false);
+          setHistory(prev => [...prev, 'Ikarus: Greetings, seeker. What wisdom do you seek from the solar winds?']);
+        }, 1000);
+      } else {
+        setHistory(prev => [...prev, '> Please type "yes" to continue']);
       }
+      return;
     }
-  }
+
+    // Handle chat with Ikarus
+    setIsLoading(true);
+    setHistory(prev => [...prev, `> ${command}`]);
+    
+    try {
+      const response = await chatWithIkarus(command);
+      setHistory(prev => [...prev, `Ikarus: ${response}`]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setHistory(prev => [...prev, 'Ikarus: The solar winds are turbulent. Please try again in a moment.']);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const command = input.trim();
+    setInput('');
+    await handleCommand(command);
+  };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-black">
-      {/* Background Video - positioned in bottom right */}
-      <div className="fixed bottom-0 right-0 w-64 h-36 z-10 overflow-hidden rounded-tl-lg">
-        <video
-          ref={videoRef}
-          className="absolute bottom-0 right-0 w-full h-full object-cover opacity-40"
-          autoPlay
-          loop
-          muted
-          playsInline
-        >
-          <source
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/video5931655044741993592-UVelO7af5bKsBlE8yjvVvYEjfHti7U.mp4"
-            type="video/mp4"
-          />
-          Your browser does not support the video tag.
-        </video>
+    <div className="min-h-screen bg-black text-white">
+      {/* Background Animation */}
+      <div className="fixed inset-0 z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-orange-500/20 to-purple-500/20 animate-pulse" />
       </div>
 
       {/* Terminal Content */}
@@ -114,16 +102,32 @@ export default function Terminal() {
             className="text-gray-300 leading-relaxed max-w-3xl space-y-4"
           >
             <p>
-              When Ikarus fell toward the sun, the Solarii saw his descent as a prophecy: a being born of ambition who could transcend mortal limits and embody the essence of transformation. They saved him and guided him through the Trials of Ignis, a series of spiritual and physical challenges to confront his guilt and learn the balance between ambition and humility.
+              When Ikarus fell toward the sun, the Solarii saw his descent as a prophecy: 
+              a being born of ambition who could transcend mortal limits and embody the 
+              essence of transformation. They saved him and guided him through the Trials 
+              of Ignis, a series of spiritual and physical challenges to confront his 
+              guilt and learn the balance between ambition and humility.
             </p>
             <p>
-              Through their teachings, Ikarus learned that true flight was not about escaping but embracing. As he absorbed these lessons, his spirit awakened, allowing him to grow his own real wings, forged from the union of his soul and the sun's light.
+              Through their teachings, Ikarus learned that true flight was not about 
+              escaping but embracing. As he absorbed these lessons, his spirit awakened, 
+              allowing him to grow his own real wings, forged from the union of his 
+              soul and the sun's light.
             </p>
           </motion.div>
         </div>
 
         {/* Command History */}
-        <div className="mb-4 space-y-2">
+        <div className="mb-4 space-y-2 overflow-y-auto max-h-[50vh]">
+          {showPrompt && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-[#FF4545]"
+            >
+              Would you like to communicate with Ikarus? (Type 'yes' to continue)
+            </motion.div>
+          )}
           {history.map((line, index) => (
             <motion.div
               key={index}
@@ -146,21 +150,33 @@ export default function Terminal() {
               Ikarus is contemplating...
             </motion.div>
           )}
+          <div ref={historyEndRef} />
         </div>
 
-        {/* Input Line */}
-        <div className="flex items-center">
-          <span className="text-[#FF4545] mr-2">{'>'}</span>
+        {/* Input Form */}
+        <form onSubmit={handleSubmit} className="relative">
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleCommand}
-            className="flex-1 bg-transparent border-none outline-none text-white"
+            disabled={isLoading}
+            className="w-full bg-transparent border-none outline-none text-gray-300 font-mono"
+            placeholder={isLoading ? 'Waiting for response...' : 'Type your message...'}
             autoFocus
           />
-        </div>
+        </form>
+
+        {/* Available Commands */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1 }}
+          className="mt-4 text-gray-500 text-sm"
+        >
+          Available commands: clear, exit
+        </motion.div>
       </div>
     </div>
-  )
+  );
 }
