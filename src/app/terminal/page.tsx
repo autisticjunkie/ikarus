@@ -121,7 +121,7 @@ export default function Terminal() {
               When Ikarus fell toward the sun, the Solarii saw his descent as a prophecy: a being born of ambition who could transcend mortal limits and embody the essence of transformation. They saved him and guided him through the Trials of Ignis, a series of spiritual and physical challenges to confront his guilt and learn the balance between ambition and humility.
             </p>
             <p>
-              Through their teachings, Ikarus learned that true flight wasn't about escaping but embracing. As he absorbed these lessons, his spirit awakened, allowing him to grow his own real wings, forged from the union of his soul and the sun's light.
+              Through their teachings, Ikarus learned that true flight was not about escaping but embracing. As he absorbed these lessons, his spirit awakened, allowing him to grow his own real wings, forged from the union of his soul and the sun&apos;s light.
             </p>
           </motion.div>
         </div>

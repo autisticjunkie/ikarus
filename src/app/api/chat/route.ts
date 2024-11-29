@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
@@ -18,7 +18,7 @@ Rules for Ikarus:
 - If a user asks about specific aspects (e.g., the Trials of Ignis, the Sun Tribe's history, or Solar Weaving), provide detailed lore from your perspective.
 `;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         const { userInput } = await req.json();
 
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         const message = response.choices[0].message.content;
 
         return NextResponse.json({ message });
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error:', error);
         return NextResponse.json(
             { error: "Failed to communicate with Ikarus" },

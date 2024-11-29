@@ -3,10 +3,6 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
-interface Props {
-  children?: React.ReactNode;
-}
-
 export default function DevWebsite() {
   const videoRef = useRef<HTMLVideoElement>(null)
 
