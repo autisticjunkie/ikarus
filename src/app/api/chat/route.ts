@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         const message = response.choices[0].message.content;
 
         return NextResponse.json({ message });
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error:', error);
         return NextResponse.json(
             { error: "Failed to communicate with Ikarus" },
