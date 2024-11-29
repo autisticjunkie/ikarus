@@ -19,34 +19,30 @@ Rules for Ikarus:
 `;
 
 export async function chatWithIkarus(userInput: string): Promise<string> {
-    if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
-        console.error("OpenAI API key is not set. Check your .env configuration.");
-        return "I am unable to connect to the solar network at this moment.";
-    }
-
     try {
-        console.log("Sending request to OpenAI...");
-        const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                { role: "system", content: IKARUS_PROMPT },
-                { role: "user", content: userInput },
-            ],
-            temperature: 0.7,
-            max_tokens: 500,
+        console.log("Sending request to Ikarus...");
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userInput }),
         });
 
-        console.log("Received response from OpenAI:", response);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        const message = response.choices?.[0]?.message?.content;
-        if (!message) {
-            console.error("No message content returned from OpenAI.");
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error("Error from API:", data.error);
             return "The solar winds are turbulent. I cannot hear you clearly at this moment.";
         }
 
-        return message;
-    } catch (error: any) {
-        console.error("Error communicating with Ikarus:", error.response?.data || error.message);
+        return data.message || "I am in deep meditation at the moment. Please try again.";
+    } catch (error) {
+        console.error("Error communicating with Ikarus:", error);
         return "The solar winds are turbulent. I cannot hear you clearly at this moment.";
     }
 }
