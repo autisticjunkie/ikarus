@@ -14,21 +14,26 @@ export async function chatWithIkarus(userInput: string): Promise<string> {
         console.log("Response data:", data);
 
         if (!response.ok) {
-            console.error("API Error:", data.error, data.details);
-            throw new Error(data.details || data.error || `HTTP error! status: ${response.status}`);
+            const errorMessage = data.details || data.error || `HTTP error! status: ${response.status}`;
+            console.error("API Error:", errorMessage);
+            return `The solar winds are turbulent. Error: ${errorMessage}`;
         }
         
         if (data.error) {
             console.error("Error from API:", data.error, data.details);
-            return `Error: ${data.details || data.error}`;
+            return `The solar winds are turbulent. ${data.details || data.error}`;
         }
 
-        return data.message || "I am in deep meditation at the moment. Please try again.";
+        if (!data.message) {
+            console.error("No message in response:", data);
+            return "I am in deep meditation at the moment. Please try again.";
+        }
+
+        console.log("Successfully received message:", data.message);
+        return data.message;
     } catch (error) {
         console.error("Error communicating with Ikarus:", error);
-        if (error instanceof Error) {
-            return `Error: ${error.message}`;
-        }
-        return "The solar winds are turbulent. I cannot hear you clearly at this moment.";
+        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+        return `The solar winds are turbulent. ${errorMessage}`;
     }
 }
