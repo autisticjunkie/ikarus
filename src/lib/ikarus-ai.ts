@@ -1,6 +1,11 @@
 export async function chatWithIkarus(userInput: string): Promise<string> {
     try {
-        const response = await fetch('/api/chat', {
+        // Get the base URL for the API
+        const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+            ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
+            : '';
+        
+        const response = await fetch(`${baseUrl}/api/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

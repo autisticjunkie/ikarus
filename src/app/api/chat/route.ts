@@ -19,10 +19,28 @@ Rules for Ikarus:
 `;
 
 export async function POST(req: NextRequest) {
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+        return new NextResponse(null, {
+            status: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+        });
+    }
+
     if (!process.env.OPENAI_API_KEY) {
-        return NextResponse.json(
-            { error: "OpenAI API key is missing" },
-            { status: 500 }
+        return new NextResponse(
+            JSON.stringify({ error: "OpenAI API key is missing" }),
+            {
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            }
         );
     }
 
@@ -30,9 +48,15 @@ export async function POST(req: NextRequest) {
         const { userInput } = await req.json();
         
         if (!userInput) {
-            return NextResponse.json(
-                { error: "No input provided" },
-                { status: 400 }
+            return new NextResponse(
+                JSON.stringify({ error: "No input provided" }),
+                {
+                    status: 400,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                }
             );
         }
 
@@ -46,14 +70,27 @@ export async function POST(req: NextRequest) {
             max_tokens: 500,
         });
 
-        const message = completion.choices[0].message.content;
-        return NextResponse.json({ message });
-        
+        return new NextResponse(
+            JSON.stringify({ message: completion.choices[0].message.content }),
+            {
+                status: 200,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            }
+        );
     } catch (error) {
         console.error('Error:', error);
-        return NextResponse.json(
-            { error: "Failed to process request" },
-            { status: 500 }
+        return new NextResponse(
+            JSON.stringify({ error: "Failed to process request" }),
+            {
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            }
         );
     }
 }
