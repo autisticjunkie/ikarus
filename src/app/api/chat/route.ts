@@ -1,5 +1,8 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+
+// Allow responses up to 5 minutes
+export const maxDuration = 300;
 
 // Initialize OpenAI with error handling
 let openai: OpenAI;
@@ -26,66 +29,38 @@ Rules for Ikarus:
 - If a user asks about specific aspects (e.g., the Trials of Ignis, the Sun Tribe's history, or Solar Weaving), provide detailed lore from your perspective.
 `;
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     console.log('📥 Received API request');
     
     // Log environment status
     console.log('🔑 API Key status:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing');
     console.log('🌍 Environment:', process.env.NODE_ENV);
-    console.log('🔗 Request URL:', req.url);
-    
-    // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-        console.log('👋 Handling CORS preflight request');
-        return new NextResponse(null, {
-            status: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST',
-                'Access-Control-Allow-Headers': 'Content-Type',
-            },
-        });
-    }
 
     // Verify API key
     if (!process.env.OPENAI_API_KEY) {
         console.error('❌ Missing OpenAI API key');
-        return new NextResponse(
-            JSON.stringify({ 
+        return NextResponse.json(
+            { 
                 error: "OpenAI API key is missing",
                 details: "Server configuration error"
-            }),
-            {
-                status: 500,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                },
-            }
+            },
+            { status: 500 }
         );
     }
 
     try {
         // Parse request body
-        const body = await req.json();
-        console.log('📦 Request body:', body);
-        
-        const { userInput } = body;
+        const { userInput } = await req.json();
+        console.log('📦 Request body:', { userInput });
         
         if (!userInput) {
             console.error('❌ No input provided in request');
-            return new NextResponse(
-                JSON.stringify({ 
+            return NextResponse.json(
+                { 
                     error: "No input provided",
                     details: "Request must include 'userInput' field"
-                }),
-                {
-                    status: 400,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                    },
-                }
+                },
+                { status: 400 }
             );
         }
 
@@ -101,68 +76,41 @@ export async function POST(req: NextRequest) {
         });
 
         console.log('✅ Received OpenAI response');
-        const message = completion.choices[0].message.content;
-        
-        return new NextResponse(
-            JSON.stringify({ message }),
-            {
-                status: 200,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                },
-            }
-        );
+        return NextResponse.json({ 
+            message: completion.choices[0].message.content 
+        });
     } catch (error) {
         console.error('❌ Error processing request:', error);
         
         // Handle specific OpenAI errors
         if (error instanceof Error) {
             if (error.message.includes('API key')) {
-                return new NextResponse(
-                    JSON.stringify({ 
+                return NextResponse.json(
+                    { 
                         error: "Authentication error",
                         details: "Invalid API key configuration"
-                    }),
-                    {
-                        status: 401,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*',
-                        },
-                    }
+                    },
+                    { status: 401 }
                 );
             }
             
             if (error.message.includes('Rate limit')) {
-                return new NextResponse(
-                    JSON.stringify({ 
+                return NextResponse.json(
+                    { 
                         error: "Rate limit exceeded",
                         details: "Please try again in a moment"
-                    }),
-                    {
-                        status: 429,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*',
-                        },
-                    }
+                    },
+                    { status: 429 }
                 );
             }
         }
 
-        return new NextResponse(
-            JSON.stringify({ 
+        return NextResponse.json(
+            { 
                 error: "Failed to process request",
                 details: error instanceof Error ? error.message : "Unknown error"
-            }),
-            {
-                status: 500,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                },
-            }
+            },
+            { status: 500 }
         );
     }
 }

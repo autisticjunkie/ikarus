@@ -9,22 +9,16 @@ export async function chatWithIkarus(userInput: string): Promise<string> {
         
         console.log('📡 API URL:', `${baseUrl}/api/chat`);
         
-        const requestBody = JSON.stringify({ userInput });
-        console.log('📦 Request payload:', requestBody);
-
         const response = await fetch(`${baseUrl}/api/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: requestBody,
+            body: JSON.stringify({ userInput }),
         });
 
         console.log('📥 Response status:', response.status);
-        console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
-
         const data = await response.json();
-        console.log('📄 Response data:', data);
 
         if (!response.ok) {
             const errorMessage = data.error || `HTTP error! status: ${response.status}`;
