@@ -55,7 +55,15 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+  		animation: {
+  			'spin-slow': 'spin 20s linear infinite',
+  		},
+  		backgroundImage: {
+  			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+  			'gradient-conic': 'conic-gradient(from 0deg at 50% 50%, var(--tw-gradient-stops))',
+  			'grid-white': 'linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+  		},
   	}
   },
   plugins: [require("tailwindcss-animate")],

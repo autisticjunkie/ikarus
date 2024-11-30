@@ -78,26 +78,34 @@ export default function Terminal() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed inset-0 w-full h-full object-cover opacity-30"
-      >
-        <source src="/sun.mp4" type="video/mp4" />
-      </video>
+    <div className="min-h-screen bg-[#030712] text-white overflow-hidden">
+      {/* Background Gradient */}
+      <div className="fixed inset-0 bg-gradient-radial from-amber-500/10 via-transparent to-transparent" />
+      <div className="fixed inset-0 bg-gradient-conic from-amber-500/20 via-transparent to-transparent animate-spin-slow" />
+      <div className="fixed inset-0 bg-grid-white/[0.02] bg-[length:50px_50px]" />
+
+      {/* Video in Bottom Right */}
+      <div className="fixed bottom-0 right-0 w-96 h-96 z-10">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover rounded-tl-3xl"
+        >
+          <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/video5931655044741993592-UVelO7af5bKsBlE8yjvVvYEjfHti7U.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent rounded-tl-3xl" />
+      </div>
 
       {/* Terminal Content */}
-      <div className="relative z-20 min-h-screen p-8 font-mono text-white">
-        <div className="mb-8">
+      <div className="relative z-20 min-h-screen p-8 font-mono">
+        <div className="mb-8 max-w-3xl">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="text-[#FF4545] text-xl mb-4"
+            className="text-amber-500 text-xl mb-4 font-bold"
           >
             Welcome to Ikarus Terminal
           </motion.div>
@@ -105,7 +113,7 @@ export default function Terminal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.5, delay: 0.3 }}
-            className="text-gray-300 leading-relaxed max-w-3xl space-y-4"
+            className="text-gray-400 leading-relaxed space-y-4"
           >
             <p>
               When Ikarus fell toward the sun, the Solarii saw his descent as a prophecy: 
@@ -124,12 +132,12 @@ export default function Terminal() {
         </div>
 
         {/* Command History */}
-        <div className="mb-4 space-y-2 overflow-y-auto max-h-[50vh] bg-black/50 p-4 rounded-lg backdrop-blur-sm">
+        <div className="mb-4 space-y-2 overflow-y-auto max-h-[50vh] bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-amber-500/20">
           {showPrompt && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-[#FF4545]"
+              className="text-amber-500"
             >
               Would you like to communicate with Ikarus? (Type 'yes' to continue)
             </motion.div>
@@ -140,8 +148,8 @@ export default function Terminal() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className={`text-gray-300 ${
-                line.startsWith('Ikarus:') ? 'text-[#FF4545]' : ''
+              className={`${
+                line.startsWith('Ikarus:') ? 'text-amber-500' : 'text-gray-400'
               }`}
             >
               {line}
@@ -151,7 +159,7 @@ export default function Terminal() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-[#FF4545]"
+              className="text-amber-500"
             >
               Ikarus is contemplating...
             </motion.div>
@@ -160,15 +168,15 @@ export default function Terminal() {
         </div>
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="relative">
-          <div className="bg-black/50 p-4 rounded-lg backdrop-blur-sm">
+        <form onSubmit={handleSubmit} className="relative max-w-3xl">
+          <div className="bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-amber-500/20">
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isLoading}
-              className="w-full bg-transparent border-none outline-none text-gray-300 font-mono"
+              className="w-full bg-transparent border-none outline-none text-gray-300 font-mono placeholder-gray-600"
               placeholder={isLoading ? 'Waiting for response...' : 'Type your message...'}
               autoFocus
             />
@@ -180,7 +188,7 @@ export default function Terminal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 1 }}
-          className="mt-4 text-gray-500 text-sm"
+          className="mt-4 text-gray-600 text-sm"
         >
           Available commands: clear, exit
         </motion.div>
