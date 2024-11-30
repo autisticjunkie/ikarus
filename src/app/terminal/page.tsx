@@ -78,11 +78,17 @@ export default function Terminal() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Background Animation */}
-      <div className="fixed inset-0 z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-orange-500/20 to-purple-500/20 animate-pulse" />
-      </div>
+    <div className="min-h-screen bg-black text-white overflow-hidden">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover opacity-30"
+      >
+        <source src="/sun.mp4" type="video/mp4" />
+      </video>
 
       {/* Terminal Content */}
       <div className="relative z-20 min-h-screen p-8 font-mono text-white">
@@ -118,7 +124,7 @@ export default function Terminal() {
         </div>
 
         {/* Command History */}
-        <div className="mb-4 space-y-2 overflow-y-auto max-h-[50vh]">
+        <div className="mb-4 space-y-2 overflow-y-auto max-h-[50vh] bg-black/50 p-4 rounded-lg backdrop-blur-sm">
           {showPrompt && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -155,16 +161,18 @@ export default function Terminal() {
 
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="relative">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-            className="w-full bg-transparent border-none outline-none text-gray-300 font-mono"
-            placeholder={isLoading ? 'Waiting for response...' : 'Type your message...'}
-            autoFocus
-          />
+          <div className="bg-black/50 p-4 rounded-lg backdrop-blur-sm">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={isLoading}
+              className="w-full bg-transparent border-none outline-none text-gray-300 font-mono"
+              placeholder={isLoading ? 'Waiting for response...' : 'Type your message...'}
+              autoFocus
+            />
+          </div>
         </form>
 
         {/* Available Commands */}

@@ -2,15 +2,14 @@ export async function chatWithIkarus(userInput: string): Promise<string> {
     console.log('🚀 Starting chat request with input:', userInput);
     
     try {
-        // Get the base URL for the API based on environment
+        // Get the base URL for the API
         const baseUrl = process.env.NODE_ENV === 'development' 
-            ? 'http://localhost:3000'
-            : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+            ? 'http://localhost:3000' 
+            : '';  // Empty for production (relative URL)
         
         const apiUrl = `${baseUrl}/api/chat`;
         console.log('📡 API URL:', apiUrl);
         console.log('🌍 Environment:', process.env.NODE_ENV);
-        console.log('🔗 VERCEL_URL:', process.env.NEXT_PUBLIC_VERCEL_URL);
         
         const response = await fetch(apiUrl, {
             method: 'POST',
