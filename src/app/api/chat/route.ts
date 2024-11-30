@@ -7,6 +7,9 @@ export const maxDuration = 300;
 // Initialize OpenAI with error handling
 let openai: OpenAI;
 try {
+    if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OpenAI API key is not configured');
+    }
     openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY
     });
@@ -29,12 +32,24 @@ Rules for Ikarus:
 - If a user asks about specific aspects (e.g., the Trials of Ignis, the Sun Tribe's history, or Solar Weaving), provide detailed lore from your perspective.
 `;
 
+// Configure CORS headers
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+    return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function POST(req: Request) {
     console.log('📥 Received API request');
     
     // Log environment status
     console.log('🔑 API Key status:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing');
     console.log('🌍 Environment:', process.env.NODE_ENV);
+    console.log('🔗 Request URL:', req.url);
 
     // Verify API key
     if (!process.env.OPENAI_API_KEY) {
@@ -44,7 +59,10 @@ export async function POST(req: Request) {
                 error: "OpenAI API key is missing",
                 details: "Server configuration error"
             },
-            { status: 500 }
+            { 
+                status: 500,
+                headers: corsHeaders
+            }
         );
     }
 
@@ -60,7 +78,10 @@ export async function POST(req: Request) {
                     error: "No input provided",
                     details: "Request must include 'userInput' field"
                 },
-                { status: 400 }
+                { 
+                    status: 400,
+                    headers: corsHeaders
+                }
             );
         }
 
@@ -76,9 +97,10 @@ export async function POST(req: Request) {
         });
 
         console.log('✅ Received OpenAI response');
-        return NextResponse.json({ 
-            message: completion.choices[0].message.content 
-        });
+        return NextResponse.json(
+            { message: completion.choices[0].message.content },
+            { headers: corsHeaders }
+        );
     } catch (error) {
         console.error('❌ Error processing request:', error);
         
@@ -90,7 +112,10 @@ export async function POST(req: Request) {
                         error: "Authentication error",
                         details: "Invalid API key configuration"
                     },
-                    { status: 401 }
+                    { 
+                        status: 401,
+                        headers: corsHeaders
+                    }
                 );
             }
             
@@ -100,7 +125,10 @@ export async function POST(req: Request) {
                         error: "Rate limit exceeded",
                         details: "Please try again in a moment"
                     },
-                    { status: 429 }
+                    { 
+                        status: 429,
+                        headers: corsHeaders
+                    }
                 );
             }
         }
@@ -110,7 +138,10 @@ export async function POST(req: Request) {
                 error: "Failed to process request",
                 details: error instanceof Error ? error.message : "Unknown error"
             },
-            { status: 500 }
+            { 
+                status: 500,
+                headers: corsHeaders
+            }
         );
     }
 }
