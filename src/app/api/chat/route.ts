@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Allow responses up to 5 minutes
-export const maxDuration = 300;
+// Set maximum duration to 60 seconds (Vercel Hobby plan limit)
+export const maxDuration = 60;
 
 // Initialize OpenAI with error handling
 let openai: OpenAI;
