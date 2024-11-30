@@ -57,7 +57,7 @@ export async function chatWithIkarus(userInput: string): Promise<string> {
         console.error('❌ Chat error:', error);
         if (error instanceof Error) {
             if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                return 'I am unable to connect to the network. Please ensure the development server is running (npm run dev) and try again.';
+                return 'I am unable to connect to the network. Please ensure the development server is running and try again.';
             }
             if (error.message.includes('API key')) {
                 return 'The solar winds are turbulent. The API key seems to be missing or invalid.';

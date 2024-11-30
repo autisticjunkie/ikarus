@@ -4,10 +4,18 @@ import OpenAI from 'openai';
 // Set maximum duration to 60 seconds (Vercel Hobby plan limit)
 export const maxDuration = 60;
 
+// Log environment status
+console.log('🔧 Environment Check:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- VERCEL_URL:', process.env.VERCEL_URL);
+console.log('- NEXT_PUBLIC_VERCEL_URL:', process.env.NEXT_PUBLIC_VERCEL_URL);
+console.log('- OPENAI_API_KEY status:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing');
+
 // Initialize OpenAI with error handling
 let openai: OpenAI;
 try {
     if (!process.env.OPENAI_API_KEY) {
+        console.error('❌ OpenAI API key is missing');
         throw new Error('OpenAI API key is not configured');
     }
     openai = new OpenAI({
