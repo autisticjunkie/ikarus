@@ -89,7 +89,7 @@ export default function DevWebsite() {
                   Terminal
                 </motion.a>
                 <motion.a
-                  href="https://x.com/ikarusonsol"
+                  href="https://x.com/"
                   className="text-[#FF4545] hover:text-red-400 transition-colors block animate-pulse"
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.2 }}
